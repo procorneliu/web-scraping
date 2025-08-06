@@ -1,0 +1,8 @@
+{
+  "quiet": false,
+  "ext": "ts",
+  "ignore": ["node_modules", "dist", "build"],
+  "execMap": {
+    "ts": "ts-node"
+  }
+}
