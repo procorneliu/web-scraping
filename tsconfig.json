@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "NodeNext",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    // "outDir": "dist",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    // "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true
+  }
+}
