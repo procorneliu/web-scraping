@@ -1,4 +1,4 @@
-import { type Request, type Response, type NextFunction, text } from 'express';
+import { type Request, type Response, type NextFunction } from 'express';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
 
@@ -7,18 +7,13 @@ import puppeteer from 'puppeteer';
 import { v4 as uuidv4 } from 'uuid';
 import { Parser } from '@json2csv/plainjs';
 
-type MetaItem = {
-  property: string;
-  content: string;
-};
-
 type ProductField = {
   [key: string]: string;
 };
 type ProductEntry = ProductField;
 
 type ProductsContent = {
-  [url: string]: MetaItem;
+  [key: string]: ProductField;
 };
 
 type JobItem = {
@@ -29,7 +24,8 @@ type JobItem = {
 };
 
 let jobs: JobItem = {};
-let products: MetaItem[] = [];
+let products: ProductField[] = [];
+const productsContent: ProductsContent = {};
 
 const scrapeUrl = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { url } = req.body;
@@ -47,8 +43,6 @@ const scrapeUrl = catchAsync(async (req: Request, res: Response, next: NextFunct
   };
 
   const browser = await puppeteer.launch();
-
-  const productsContent: ProductsContent = {};
 
   let queue = [url];
   let num = 0;
@@ -78,19 +72,11 @@ const scrapeUrl = catchAsync(async (req: Request, res: Response, next: NextFunct
         })
         .filter((el) => el);
 
-      return metaTags;
+      return Object.assign({}, ...metaTags);
     });
 
-    // Here checking if page contains url property, because all products pages contains one
-    // productsContent[url].map((el: any) => {
-    //   if (el.url) {
-    //     products.push(productsContent[url]);
-    //     products = products.filter((product) => Object.keys(product).length > 0);
-    //   }
-    // });
-
     // Here checking if page contains url and image property, because all products pages contains one
-    const hasURL = productsContent[url].some((el: any) => el.url);
+    const hasURL = [productsContent[url]].some((el: any) => el.url);
     if (hasURL) {
       products.push(productsContent[url]);
       products = products.filter((product) => Object.keys(product).length > 0);
