@@ -1,4 +1,4 @@
-import { type ProductField } from '../jobs/jobStore';
+import { type ProductField } from './jobService';
 import { Parser } from '@json2csv/plainjs';
 
 const convertToCSV = (data: ProductField[]): string => {

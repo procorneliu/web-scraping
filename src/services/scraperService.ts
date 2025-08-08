@@ -1,5 +1,5 @@
 import puppeteer, { type Page } from 'puppeteer';
-import { type Job, updateJob } from '../jobs/jobStore';
+import validUrl from 'valid-url';
 
 type ProductField = {
   [key: string]: string;
@@ -10,7 +10,8 @@ type ProductsContent = {
 };
 
 // prettier-ignore
-const IGNORED_KEYWORD = ['#', '%', '=', 'contact', 'about', 'blog', 'info', 'page', 'category', 'terms', 'help', 'user','login', 'account', 'brand'];
+const IGNORED_KEYWORD = ['#', '%', '=', 'contact', 'about', 'blog', 'info', 'page', 'category', 'terms', 'help',
+                        'user', 'login', 'account', 'brand'];
 
 const findAllUrl = async (page: Page, mainSiteUrl: string, productsContent: ProductsContent) => {
   const hrefs = await page.$$eval('a', (el) => el.map((a) => a.href));
@@ -55,31 +56,29 @@ const getMetaData = async (page: Page) => {
   return data;
 };
 
-const startPageScrape = async (pageUrl: string, job: Job) => {
-  const browser = await puppeteer.launch();
+const updateQueue = (queue: string[], newLinks: string[]) => {
+  return Array.from(new Set([...queue.slice(0, -1), ...newLinks]));
+};
 
+const scrapePage = async (pageUrl: string): Promise<ProductField[]> => {
+  const browser = await puppeteer.launch();
   const products: ProductField[] = [];
   const productsContent: ProductsContent = {};
-  let queue = [pageUrl];
+  let queue: string[] = [pageUrl];
 
   let num = 0; // will be removed
 
-  updateJob(job.job_id, { status: 'in_progress' });
-
   while (queue.length && num < 7) {
     const url = queue[queue.length - 1];
-    if (!url) continue;
+    if (!url && validUrl.isUri(url)) continue;
 
     const page = await browser.newPage();
 
     try {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     } catch (err) {
-      updateJob(job.job_id, { status: 'failed' });
-
-      queue.pop();
+      console.log(`Failed to load! ${url}`, err);
       await page.close();
-
       continue;
     }
 
@@ -89,17 +88,15 @@ const startPageScrape = async (pageUrl: string, job: Job) => {
     productsContent[url] = content;
 
     // Here checking if page contains url and image property, because all products pages contains one
-    const isValidProductPage = content.url && content.image;
-    const isNotMaingPage = !(url === pageUrl);
-    if (isValidProductPage && isNotMaingPage) {
+    const isValidProductPage = content.url && content.image && url !== pageUrl;
+
+    if (isValidProductPage) {
       products.push(content);
     }
 
     const newLinks = await findAllUrl(page, url, productsContent);
 
-    queue.pop();
-    queue.push(...newLinks);
-    queue = [...new Set(queue)];
+    queue = updateQueue(queue, newLinks);
 
     await page.close();
     num++;
@@ -107,11 +104,7 @@ const startPageScrape = async (pageUrl: string, job: Job) => {
 
   await browser.close();
 
-  const result = products.map((product) => {
-    return Array.isArray(product) ? Object.assign({}, ...product) : product;
-  });
-
-  updateJob(job.job_id, { status: 'completed', result });
+  return products;
 };
 
-export default startPageScrape;
+export default scrapePage;
