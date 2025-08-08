@@ -11,15 +11,20 @@
   "description": "",
   "dependencies": {
     "@json2csv/plainjs": "^7.0.6",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1",
     "puppeteer": "^24.15.0",
     "uuid": "^11.1.0",
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/morgan": "^1.9.10",
     "@types/valid-url": "^1.0.7",
     "eslint": "^9.32.0",
     "globals": "^16.3.0",

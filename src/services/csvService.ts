@@ -1,9 +1,11 @@
 import { type ProductField } from './jobService';
 import { Parser } from '@json2csv/plainjs';
 
-const convertToCSV = (data: ProductField[]): string => {
+// Convert JSON data into CSV format
+const convertToCSV = (data: ProductField[], fields: string[]): string => {
+  // Options for CSV formatting
   const parserOptions = {
-    fields: ['url', 'title', 'description', 'image'],
+    fields,
     quote: '"',
     escapedQuote: '""',
     delimiter: ';',
@@ -12,6 +14,7 @@ const convertToCSV = (data: ProductField[]): string => {
   };
 
   const parser = new Parser(parserOptions);
+
   return parser.parse(data);
 };
 
