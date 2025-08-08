@@ -8,7 +8,7 @@
   "keywords": [],
   "author": "Corneliu Procopenco",
   "license": "ISC",
-  "description": "",
+  "description": "Microservice for crawling and scraping data about products from e-commerce sites.",
   "dependencies": {
     "@json2csv/plainjs": "^7.0.6",
     "cors": "^2.8.5",
@@ -16,7 +16,9 @@
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
+    "nodemon": "^3.1.10",
     "puppeteer": "^24.15.0",
+    "ts-node": "^10.9.2",
     "uuid": "^11.1.0",
     "valid-url": "^1.0.9"
   },
@@ -29,8 +31,6 @@
     "eslint": "^9.32.0",
     "globals": "^16.3.0",
     "jiti": "^2.5.1",
-    "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.39.0"
   }

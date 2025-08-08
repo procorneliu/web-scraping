@@ -84,7 +84,10 @@ const updateQueue = (queue: string[], newLinks: string[]) => {
 // FUNCTIONS THAT IS CRAWLING AND SCRAPING ALL DATA
 const scrapePage = async (pageUrl: string): Promise<ProductField[]> => {
   // Opening browser using puppeteer
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    executablePath: '/usr/bin/chromium',
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
 
   // variable where all products data are stored in objects
   const products: ProductField[] = [];
@@ -113,7 +116,10 @@ const scrapePage = async (pageUrl: string): Promise<ProductField[]> => {
       continue;
     }
 
-    console.log(url); // should be removed
+    // Show crawling paths if in DEV mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log(url);
+    }
 
     const content = await getMetaData(page);
     productsContent[url] = content;
@@ -137,8 +143,6 @@ const scrapePage = async (pageUrl: string): Promise<ProductField[]> => {
     num++;
   }
 
-  console.log(products);
-  console.log(productsContent);
   // Closing browser
   await browser.close();
 
