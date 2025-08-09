@@ -38,8 +38,18 @@ docker build -t web-scraping .
 
 #### Run the container:
 
+**Option 1:**
+User will need to make repetitive request to get job status.
+
 ```bash
 docker run -p 3000:3000 web-scraping
+```
+
+**Option 2:**
+Using Server-Sent Events (SSE) to get the status of the job when it is "completed".
+
+```bash
+docker run -p 3000:3000 -e USING_SSE=true web-scraping
 ```
 
 The API will be available at:
@@ -57,7 +67,20 @@ If you already have Node.js installed:
 
 ```bash
 npm install
+```
+
+**Option 1:**
+User will need to make repetitive request to get job status.
+
+```bash
 npm start
+```
+
+**Option 2:**
+Using Server-Sent Events (SSE) to get the status of the job when it is "completed".
+
+```bash
+USING_SSE=true npm start
 ```
 
 ---
@@ -72,7 +95,7 @@ For a better experience, use Postman (https://www.postman.com/downloads/), as I 
 ### Start a new scraping job
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/scrape/start -H "Content-Type: application/json" -d '{"url": "https://your_url.com"}'
+curl -X POST http://localhost:3000/api/v1/scrape/start -H "Content-Type: application/json" -d '{"url": "https://sakurashop.md/"}'
 ```
 
 **Response:**

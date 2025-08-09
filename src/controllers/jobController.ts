@@ -63,10 +63,35 @@ const getJobStatus = catchAsync(async (req: Request, res: Response, next: NextFu
   const job = validateJobExistence(req.params.id, res, next);
   if (!job) return;
 
-  // Send job status: 'pending' | 'in_progress' | 'completed' | 'failed'
-  res.status(200).json({
-    status: job.status,
-  });
+  // If environment variable USING_SSE exists, remain connected and get job status when done
+  if (process.env.USING_SSE) {
+    // HTTP headers for SSE
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    if (job.status !== 'completed') {
+      res.write(`data: status: ${job.status}\n\n`);
+    }
+
+    // Every 2 seconds
+    const intervalId = setInterval(() => {
+      // Get actual job status
+      const refreshJob = getJob(job.job_id);
+
+      // If job completed, send status and end connection
+      if (refreshJob.status === 'completed') {
+        clearInterval(intervalId);
+        res.write(`data: status: ${refreshJob.status}\n\n`);
+        res.end();
+      }
+    }, 2000);
+  } else {
+    // Send job status: 'pending' | 'in_progress' | 'completed' | 'failed'
+    res.status(200).json({
+      status: job.status,
+    });
+  }
 });
 
 // Download all scrape data into a CSV file, using job_id
