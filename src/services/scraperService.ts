@@ -1,4 +1,4 @@
-import puppeteer, { type Page } from 'puppeteer';
+import puppeteer, { executablePath, type Page } from 'puppeteer';
 import validUrl from 'valid-url';
 
 // Declaring INTERFACES and TYPES for Typescript
@@ -8,6 +8,11 @@ type ProductField = {
 
 type ProductContent = {
   [key: string]: ProductField;
+};
+
+type LaunchOptions = {
+  executablePath?: string;
+  args: string[];
 };
 
 // prettier-ignore
@@ -83,11 +88,15 @@ const updateQueue = (queue: string[], newLinks: string[]) => {
 
 // FUNCTIONS THAT IS CRAWLING AND SCRAPING ALL DATA
 const scrapePage = async (pageUrl: string): Promise<ProductField[]> => {
-  // Opening browser using puppeteer
-  const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/chromium',
+  const options: LaunchOptions = {
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  };
+
+  // ONLY if running app in Docker use Chromium
+  if (process.env.USING_DOCKER) options.executablePath = '/usr/bin/chromium';
+
+  // Opening browser using puppeteer
+  const browser = await puppeteer.launch(options);
 
   // variable where all products data are stored in objects
   const products: ProductField[] = [];
@@ -97,9 +106,8 @@ const scrapePage = async (pageUrl: string): Promise<ProductField[]> => {
   // All links that needs to be scraped
   let queue: string[] = [pageUrl];
 
-  let num = 0;
   // RUN until in queue exists a URL
-  while (queue.length && num < 7) {
+  while (queue.length) {
     // Check if URL exists and is valid
     const url = queue[queue.length - 1];
     if (!url && validUrl.isUri(url)) continue;
@@ -140,7 +148,6 @@ const scrapePage = async (pageUrl: string): Promise<ProductField[]> => {
 
     // Closing current page
     await page.close();
-    num++;
   }
 
   // Closing browser
